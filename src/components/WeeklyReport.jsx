@@ -1,6 +1,6 @@
 import { BarChart3 } from "lucide-react";
 
-export default function WeeklyReport({ data = [] }) {
+export default function WeeklyReport({ data = [], onExport = () => {} }) {
   const max = Math.max(1, ...data.map((d) => d.value));
   return (
     <section id="report" className="py-12 sm:py-16 bg-slate-50">
@@ -10,7 +10,7 @@ export default function WeeklyReport({ data = [] }) {
             <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-emerald-600" /> Weekly Report
             </h2>
-            <button className="text-sm text-emerald-700 hover:text-emerald-800">Export CSV</button>
+            <button onClick={onExport} className="text-sm text-emerald-700 hover:text-emerald-800">Export CSV</button>
           </div>
 
           <div className="mt-6 grid grid-cols-7 gap-3 items-end h-48">

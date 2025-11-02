@@ -1,6 +1,14 @@
 import { Camera, Plus, ShieldCheck } from "lucide-react";
 
-export default function HeroScan({ onScan, onAddManual }) {
+export default function HeroScan({ onScan, onAddManual, detection }) {
+  const detected = detection ?? {
+    name: "Chicken Biryani",
+    confidence: 92,
+    weight: 350,
+    carbs: 85,
+    macros: { protein: 22, fat: 14 },
+  };
+
   return (
     <section id="scan" className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white">
       <div className="absolute inset-0 pointer-events-none" aria-hidden>
@@ -43,18 +51,18 @@ export default function HeroScan({ onScan, onAddManual }) {
                 <p className="text-sm font-medium text-slate-700">Detected</p>
                 <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
                   <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 text-emerald-700 px-3 py-1">
-                    Chicken Biryani <span className="text-xs">(92%)</span>
+                    {detected.name} <span className="text-xs">({detected.confidence}%)</span>
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 text-slate-700 px-3 py-1">
-                    350 g
+                    {detected.weight} g
                   </span>
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { label: "Carbs", value: "85 g" },
-                  { label: "Protein", value: "22 g" },
-                  { label: "Fat", value: "14 g" },
+                  { label: "Carbs", value: `${detected.carbs} g` },
+                  { label: "Protein", value: `${detected.macros?.protein ?? 0} g` },
+                  { label: "Fat", value: `${detected.macros?.fat ?? 0} g` },
                 ].map((m) => (
                   <div key={m.label} className="rounded-xl border border-slate-200 p-4">
                     <p className="text-xs uppercase tracking-wide text-slate-500">{m.label}</p>

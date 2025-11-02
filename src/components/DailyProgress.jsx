@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 function ProgressRing({ percent = 0 }) {
   const angle = Math.min(100, Math.max(0, percent)) * 3.6;
   const gradient = `conic-gradient(#10b981 ${angle}deg, #e5e7eb 0deg)`;
@@ -14,15 +16,28 @@ function ProgressRing({ percent = 0 }) {
   );
 }
 
-export default function DailyProgress({ goal = 220, consumed = 180, meals = [] }) {
+export default function DailyProgress({ goal = 220, consumed = 0, meals = [], manualOpen = false, onOpenManual = () => {}, onAddMeal = () => {}, onCancelManual = () => {} }) {
   const percent = (consumed / goal) * 100;
+
+  const [form, setForm] = useState({
+    name: "",
+    weight: "",
+    carbs: "",
+    time: "Breakfast",
+  });
+
+  const canSubmit = form.name && form.weight && form.carbs && form.time;
+
   return (
     <section id="log" className="py-12 sm:py-16 bg-white">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 grid lg:grid-cols-2 gap-8 items-start">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-slate-900">Today's Meals</h2>
-            <p className="text-sm text-slate-500">{consumed}g / {goal}g</p>
+            <div className="flex items-center gap-3">
+              <p className="text-sm text-slate-500">{consumed}g / {goal}g</p>
+              <button onClick={onOpenManual} className="text-sm rounded-lg px-3 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700">Add meal</button>
+            </div>
           </div>
           <div className="flex items-center gap-6">
             <ProgressRing percent={percent} />
@@ -36,8 +51,48 @@ export default function DailyProgress({ goal = 220, consumed = 180, meals = [] }
                   <p className="text-sm font-semibold text-emerald-700">{m.carbs}g</p>
                 </li>
               ))}
+              {meals.length === 0 && (
+                <li className="text-sm text-slate-500">No meals yet. Add your first meal.</li>
+              )}
             </ul>
           </div>
+
+          {manualOpen && (
+            <div className="mt-6 border-t border-slate-200 pt-6">
+              <h3 className="text-sm font-semibold text-slate-900">Add meal manually</h3>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Food (e.g., Naan)" className="col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                <input value={form.weight} onChange={(e) => setForm({ ...form, weight: e.target.value })} placeholder="Weight (g)" type="number" className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                <input value={form.carbs} onChange={(e) => setForm({ ...form, carbs: e.target.value })} placeholder="Carbs (g)" type="number" className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                <select value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} className="col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                  <option>Breakfast</option>
+                  <option>Lunch</option>
+                  <option>Dinner</option>
+                  <option>Snack</option>
+                </select>
+              </div>
+              <div className="mt-4 flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    if (!canSubmit) return;
+                    const meal = {
+                      name: form.name.trim(),
+                      weight: Number(form.weight),
+                      carbs: Number(form.carbs),
+                      time: form.time,
+                    };
+                    onAddMeal(meal);
+                    setForm({ name: "", weight: "", carbs: "", time: "Breakfast" });
+                  }}
+                  disabled={!canSubmit}
+                  className={`rounded-lg px-4 py-2 text-sm text-white ${canSubmit ? "bg-emerald-600 hover:bg-emerald-700" : "bg-emerald-300 cursor-not-allowed"}`}
+                >
+                  Save Meal
+                </button>
+                <button onClick={onCancelManual} className="rounded-lg px-4 py-2 text-sm bg-slate-100 text-slate-700 hover:bg-slate-200">Cancel</button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-emerald-50 to-white p-6 shadow-sm" id="learn">
